@@ -1,0 +1,88 @@
+package com.medicalstore.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.medicalstore.dao.StockDao;
+import com.medicalstore.dto.StockDto;
+import com.medicalstore.entity.MedicineEntity;
+import com.medicalstore.service.MedicineService;
+
+import feign.Client;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/medicines")
+@CrossOrigin(origins = "*")
+public class MedicineController {
+
+    @Autowired
+    private MedicineService medicineService;
+    @Autowired
+    private StockDao stockDao;
+    
+
+    @GetMapping("all")
+    public ResponseEntity<List<MedicineEntity>> getAllMedicines() {
+        List<MedicineEntity> medicines = medicineService.getAllMedicines();
+        return new ResponseEntity<>(medicines, HttpStatus.OK);
+    }
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<MedicineEntity> getMedicineById(@PathVariable Long id) {
+        MedicineEntity medicine = medicineService.getMedicineById(id);
+        return new ResponseEntity<>(medicine, HttpStatus.OK);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> addMedicine(@RequestBody MedicineEntity medicine) {
+        try {
+            MedicineEntity newMedicine = medicineService.saveMedicine(medicine);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newMedicine);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add medicine");
+        }
+    }
+
+    @PutMapping("update/{id}")
+    public ResponseEntity<MedicineEntity> updateMedicine(@PathVariable Long id, @RequestBody MedicineEntity updatedMedicine) {
+        MedicineEntity existingMedicine = medicineService.getMedicineById(id);
+
+        existingMedicine.setName(updatedMedicine.getName());
+        existingMedicine.setDosage(updatedMedicine.getDosage());
+        existingMedicine.setPrice(updatedMedicine.getPrice());
+        existingMedicine.setExpirationDate(updatedMedicine.getExpirationDate());
+        existingMedicine.setManufacturer(updatedMedicine.getManufacturer());
+        existingMedicine.setBatchNumber(updatedMedicine.getBatchNumber());
+        existingMedicine.setManufacturingDate(updatedMedicine.getManufacturingDate());
+        existingMedicine.setDescription(updatedMedicine.getDescription());
+        existingMedicine.setQuantity(updatedMedicine.getQuantity());
+
+        MedicineEntity updatedMedicineEntity = medicineService.saveMedicine(existingMedicine);
+        return new ResponseEntity<>(updatedMedicineEntity, HttpStatus.OK);
+    }
+
+    @GetMapping("/stocks/{id}")
+    public StockDto getStockById(@PathVariable("id") Long id) {
+        return stockDao.getStockById(id).getBody();
+    }
+
+    @PutMapping("/quantityUpdate/{id}/{quantity}")
+    public ResponseEntity<MedicineEntity> updateMedicineQuantity(@PathVariable("id") long id, @PathVariable("quantity") int quantity) {
+        MedicineEntity updatedMedicine = medicineService.updateMedicineQuantity(id, quantity);
+        return ResponseEntity.ok(updatedMedicine);
+    }
+    @GetMapping("/allByClientId")
+    public ResponseEntity<List<MedicineEntity>> getAllMedicines(@RequestParam Long clientId) {
+        List<MedicineEntity> medicines = medicineService.getAllMedicinesByClientId(clientId);
+        return new ResponseEntity<>(medicines, HttpStatus.OK);
+    }
+
+
+
+}

@@ -1,0 +1,89 @@
+package com.medicalstore.tests;
+
+
+import com.medicalstore.controller.MedicineController;
+import com.medicalstore.entity.MedicineEntity;
+import com.medicalstore.service.MedicineService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+
+@WebMvcTest(MedicineController.class)
+public class MedicineTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private MedicineService medicineService;
+
+    @InjectMocks
+    private MedicineController medicineController;
+
+    private List<MedicineEntity> medicineList;
+
+    @BeforeEach
+    void setUp() {
+        medicineList = new ArrayList<>();
+        medicineList.add(new MedicineEntity(1L, "Paracetamol", "500mg", 5.0, LocalDate.now().plusMonths(6), "Manufacturer A", "12345", LocalDate.now(), "Painkiller", 100));
+        medicineList.add(new MedicineEntity(2L, "Ibuprofen", "200mg", 7.0, LocalDate.now().plusMonths(8), "Manufacturer B", "54321", LocalDate.now(), "Anti-inflammatory", 50));
+    }
+
+    @Test
+    public void testGetAllMedicines() throws Exception {
+        when(medicineService.getAllMedicines()).thenReturn(medicineList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/medicines/all"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(medicineList.size()));
+    }
+
+    @Test
+    public void testGetMedicineById() throws Exception {
+        MedicineEntity medicine = medicineList.get(0);
+        when(medicineService.getMedicineById(1L)).thenReturn(medicine);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/medicines/get/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(medicine.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(medicine.getName()));
+    }
+
+    @Test
+    public void testAddMedicine() throws Exception {
+        MedicineEntity newMedicine = new MedicineEntity(3L, "Aspirin", "100mg", 3.0, LocalDate.now().plusMonths(10), "Manufacturer C", "98765", LocalDate.now(), "Analgesic", 200);
+        when(medicineService.saveMedicine(any(MedicineEntity.class))).thenReturn(newMedicine);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/medicines/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"name\": \"Aspirin\", \"dosage\": \"100mg\", \"price\": 3.0, \"expirationDate\": \"2024-10-01\", \"manufacturer\": \"Manufacturer C\", \"batchNumber\": \"98765\", \"manufacturingDate\": \"2024-03-20\", \"description\": \"Analgesic\", \"quantity\": 200 }"))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(newMedicine.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(newMedicine.getName()));
+    }
+
+    @Test
+    public void testUpdateMedicineQuantity() throws Exception {
+        MedicineEntity medicine = medicineList.get(0);
+        int updatedQuantity = medicine.getQuantity() + 10;
+        when(medicineService.updateMedicineQuantity(1L, updatedQuantity)).thenReturn(new MedicineEntity(1L, "Paracetamol", "500mg", 5.0, LocalDate.now().plusMonths(6), "Manufacturer A", "12345", LocalDate.now(), "Painkiller", updatedQuantity));
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/medicines/quantityUpdate/1/110"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.quantity").value(updatedQuantity));
+    }
+}

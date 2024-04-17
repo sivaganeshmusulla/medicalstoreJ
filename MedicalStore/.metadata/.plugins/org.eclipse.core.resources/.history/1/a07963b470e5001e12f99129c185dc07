@@ -1,0 +1,134 @@
+package com.medicalstore.tests;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.medicalstore.controller.SalesController;
+import com.medicalstore.dao.ClientDao;
+import com.medicalstore.dao.MedicineDao;
+import com.medicalstore.dto.ClientDto;
+import com.medicalstore.dto.MedicinDto;
+import com.medicalstore.dto.RequestDto;
+import com.medicalstore.entity.Sales;
+import com.medicalstore.service.SalesService;
+
+@ExtendWith(MockitoExtension.class)
+class SalesTests {
+
+    @Mock
+    private SalesService salesService;
+
+    @Mock
+    private ClientDao clientDao;
+
+    @Mock
+    private MedicineDao medicineDao;
+
+    @InjectMocks
+    private SalesController salesController;
+
+    @Test
+    void testGetAllSales() {
+        // Prepare
+        List<Sales> salesList = new ArrayList<>();
+        salesList.add(new Sales(1L, 1L, new ArrayList<>(), 100.0, LocalDate.now()));
+
+        when(salesService.getAllSales()).thenReturn(salesList);
+
+        // Execute
+        ResponseEntity<List<Sales>> response = salesController.getAllSales();
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(salesList, response.getBody());
+    }
+
+    @Test
+    void testPurchaseMedicine() {
+        // Prepare
+        RequestDto requestDto = new RequestDto(1L, 1L, 5);
+        Sales sales = new Sales(1L, 1L, new ArrayList<>(), 100.0, LocalDate.now());
+
+        when(salesService.purchaseMedicine(requestDto.getClientId(), requestDto.getMedicineId(), requestDto.getQuantity())).thenReturn(sales);
+
+        // Execute
+        ResponseEntity<Sales> response = salesController.purchaseMedicine(requestDto);
+
+        // Verify
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(sales, response.getBody());
+    }
+
+    @Test
+    void testDeleteSale() {
+        // Prepare
+        Long saleId = 1L;
+
+        // Execute
+        ResponseEntity<Void> response = salesController.deleteSale(saleId);
+
+        // Verify
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(salesService, times(1)).deleteSaleById(saleId);
+    }
+
+    @Test
+    void testGetClientById() {
+        // Prepare
+        Long clientId = 1L;
+        ClientDto clientDto = new ClientDto(1L, "John Doe", "john@example.com");
+
+        when(clientDao.getClientById(clientId)).thenReturn(ResponseEntity.ok(clientDto));
+
+        // Execute
+        ClientDto result = salesController.get(clientId);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(clientDto, result);
+    }
+
+    @Test
+    void testGetMedicineById() {
+        // Prepare
+        Long medicineId = 1L;
+        MedicinDto medicinDto = new MedicinDto(1L, "Medicine", "10mg", 10.0, LocalDate.now().plusMonths(6));
+
+        when(medicineDao.getMedicineById(medicineId)).thenReturn(ResponseEntity.ok(medicinDto));
+
+        // Execute
+        MedicinDto result = salesController.getMedicineById(medicineId);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(medicinDto, result);
+    }
+
+    @Test
+    void testGetSalesByClientId() {
+        // Prepare
+        Long clientId = 1L;
+        List<Sales> salesList = new ArrayList<>();
+        salesList.add(new Sales(1L, clientId, new ArrayList<>(), 100.0, LocalDate.now()));
+
+        when(salesService.getSalesByClientId(clientId)).thenReturn(salesList);
+
+        // Execute
+        ResponseEntity<List<Sales>> response = salesController.getSalesByClientId(clientId);
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(salesList, response.getBody());
+    }
+}

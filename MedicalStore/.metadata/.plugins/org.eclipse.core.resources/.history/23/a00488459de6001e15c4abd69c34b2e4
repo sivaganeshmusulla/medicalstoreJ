@@ -1,0 +1,106 @@
+package com.medicalstore.tests;
+import com.medicalstore.controller.SalesController;
+import com.medicalstore.entity.Sales;
+import com.medicalstore.service.SalesService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class SalesTests {
+
+    @Mock
+    private SalesService salesService;
+
+    @InjectMocks
+    private SalesController salesController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    void testGetAllSales() {
+        // Mock data
+        List<Sales> salesList = new ArrayList<>();
+        Sales sale1 = new Sales();
+        sale1.setId(1L);
+        sale1.setClientId(1L);
+        sale1.setTotalPrice(50.0);
+        sale1.setDate(LocalDate.now());
+        salesList.add(sale1);
+
+        // Stubbing the service method
+        when(salesService.getAllSales()).thenReturn(salesList);
+
+        // Calling the controller method
+        ResponseEntity<List<Sales>> response = salesController.getAllSales();
+
+        // Verifying the response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    void testPurchaseMedicine() {
+        // Mock data
+        Sales newSales = new Sales();
+        newSales.setId(1L);
+        newSales.setClientId(1L);
+        newSales.setTotalPrice(50.0);
+        newSales.setDate(LocalDate.now());
+
+        // Stubbing the service method
+        when(salesService.purchaseMedicine(1L, new ArrayList<>(), new ArrayList<>())).thenReturn(newSales);
+
+        // Calling the controller method
+        ResponseEntity<Sales> response = salesController.purchaseMedicine(1L, new ArrayList<>(), new ArrayList<>());
+
+        // Verifying the response
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(newSales, response.getBody());
+    }
+
+    @Test
+    void testDeleteSale() {
+        // Calling the controller method
+        ResponseEntity<Void> response = salesController.deleteSale(1L);
+
+        // Verifying the response
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(salesService, times(1)).deleteSaleById(1L);
+    }
+
+    @Test
+    void testGetSalesByClientId() {
+        // Mock data
+        List<Sales> salesList = new ArrayList<>();
+        Sales sale1 = new Sales();
+        sale1.setId(1L);
+        sale1.setClientId(1L);
+        sale1.setTotalPrice(50.0);
+        sale1.setDate(LocalDate.now());
+        salesList.add(sale1);
+
+        // Stubbing the service method
+        when(salesService.getSalesByClientId(1L)).thenReturn(salesList);
+
+        // Calling the controller method
+        ResponseEntity<List<Sales>> response = salesController.getSalesByClientId(1L);
+
+        // Verifying the response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+    }
+}

@@ -1,0 +1,85 @@
+package com.medicalstore.tests;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.medicalstore.controller.StockController;
+import com.medicalstore.entity.Stock;
+import com.medicalstore.service.StockService;
+
+@ExtendWith(MockitoExtension.class)
+public class StockTests {
+
+    @Mock
+    private StockService stockService;
+
+    @InjectMocks
+    private StockController stockController;
+
+    @Test
+    public void testGetAllStock() {
+        List<Stock> stocks = new ArrayList<>();
+        // Add some sample stock data to the list
+        // Populate stocks...
+
+        when(stockService.getAllStock()).thenReturn(stocks);
+
+        ResponseEntity<List<Stock>> response = stockController.getAllStock();
+
+        assertEquals(stocks, response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void testGetStockById() {
+        Long id = 1L;
+        Stock stock = new Stock();
+        // Populate stock...
+
+        when(stockService.getStockById(id)).thenReturn(stock);
+
+        ResponseEntity<Stock> response = stockController.getStockById(id);
+
+        assertEquals(stock, response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void testAddStock() {
+        Stock stock = new Stock();
+        // Populate stock...
+
+        when(stockService.saveStock(any(Stock.class))).thenReturn(stock);
+
+        ResponseEntity<Stock> response = stockController.addStock(stock);
+
+        assertEquals(stock, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteStock() {
+        Long id = 1L;
+
+        ResponseEntity<Void> response = stockController.deleteStock(id);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+
+  
+
+    
+}
+

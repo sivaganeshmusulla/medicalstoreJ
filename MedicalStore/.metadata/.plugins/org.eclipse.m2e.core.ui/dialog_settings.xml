@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="MavenProjectImportWizardPage">
+		<list key="rootDirectory">
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\SalesService"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\StockService"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\MedicineService"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\Gateway"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\EurekaServer"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\ClientService"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\CartService"/>
+			<item value="C:\Users\PARVSHAI\OneDrive - Capgemini\Capgemini Handson\Microservice2\AdminService1 3"/>
+		</list>
+		<list key="projectNameTemplate">
+			<item value="[artifactId]"/>
+			<item value="[artifactId]-TRUNK"/>
+			<item value="[artifactId]-[version]"/>
+			<item value="[groupId].[artifactId]"/>
+			<item value="[groupId].[artifactId]-[version]"/>
+			<item value="[name]"/>
+		</list>
+	</section>
+</section>

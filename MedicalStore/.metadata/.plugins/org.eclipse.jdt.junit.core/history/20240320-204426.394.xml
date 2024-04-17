@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="MedicineTests" project="MedicineService" tests="4" started="4" failures="0" errors="0" ignored="0">
+  <testsuite name="com.medicalstore.tests.MedicineTests" time="2.098" displayname="MedicineTests" uniqueid="[engine:junit-jupiter]/[class:com.medicalstore.tests.MedicineTests]">
+    <testcase name="testUpdateMedicine" classname="com.medicalstore.tests.MedicineTests" time="2.069" displayname="testUpdateMedicine()" uniqueid="[engine:junit-jupiter]/[class:com.medicalstore.tests.MedicineTests]/[method:testUpdateMedicine()]"/>
+    <testcase name="testUpdateMedicineQuantity" classname="com.medicalstore.tests.MedicineTests" time="0.01" displayname="testUpdateMedicineQuantity()" uniqueid="[engine:junit-jupiter]/[class:com.medicalstore.tests.MedicineTests]/[method:testUpdateMedicineQuantity()]"/>
+    <testcase name="testGetAllMedicines" classname="com.medicalstore.tests.MedicineTests" time="0.007" displayname="testGetAllMedicines()" uniqueid="[engine:junit-jupiter]/[class:com.medicalstore.tests.MedicineTests]/[method:testGetAllMedicines()]"/>
+    <testcase name="testAddMedicine" classname="com.medicalstore.tests.MedicineTests" time="0.006" displayname="testAddMedicine()" uniqueid="[engine:junit-jupiter]/[class:com.medicalstore.tests.MedicineTests]/[method:testAddMedicine()]"/>
+  </testsuite>
+</testrun>

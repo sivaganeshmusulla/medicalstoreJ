@@ -1,0 +1,130 @@
+package com.medicalstore.service;
+import com.medicalstore.dao.ClientDao;
+import com.medicalstore.dao.MedicineDao;
+import com.medicalstore.dto.ClientDto;
+import com.medicalstore.dto.MedicinDto;
+import com.medicalstore.entity.Sales;
+import com.medicalstore.exception.SalesNotFoundException;
+import com.medicalstore.repository.SalesRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Service
+public class SalesService {
+    @Autowired
+    private SalesRepository saleRepository;
+    
+
+    @Autowired
+    private ClientDao clientDao;
+   
+    @Autowired
+    private MedicineDao medicineDao;
+    
+    public List<Sales> getAllSales() {
+        return saleRepository.findAll();
+    }
+    public void deleteSaleById(Long id) {
+        saleRepository.deleteById(id);
+    }
+
+    public Sales saveSales(Sales sales) {
+        // Get the client ID from the sales entity
+        Long clientId = sales.getClientId();
+        
+        // Fetch the client by ID
+        ClientDto client = clientDao.getClientById(clientId).getBody();
+        if (client == null) {
+            throw new SalesNotFoundException("Client with ID " + clientId + " not found");
+        }
+
+        // Get the list of medicine IDs from the sales entity
+        List<Long> medicineIds = sales.getMedicinesId();
+        
+        // Iterate through each medicine ID
+        for (Long medicineId : medicineIds) {
+            // Fetch the medicine by ID
+            MedicinDto medicine = medicineDao.getMedicineById(medicineId).getBody();
+            if (medicine == null) {
+                throw new SalesNotFoundException("Medicine with ID " + medicineId + " not found");
+            }
+        }
+
+        // Save the sales entity
+        return saleRepository.save(sales);
+    }
+
+
+    public Sales purchaseMedicine(Long clientId, List<Long> medicineIds, List<Integer> quantitiesSold) {
+        // Fetch the client by ID
+        ClientDto client = clientDao.getClientById(clientId).getBody();
+        if (client == null) {
+            throw new SalesNotFoundException("Client with ID " + clientId + " not found");
+        }
+
+        // Initialize total price
+        double total = 0.0;
+
+        // Initialize list to store medicine IDs
+        List<Long> purchasedMedicineIds = new ArrayList<>();
+
+        // Iterate through each medicine ID and quantity sold
+        for (int i = 0; i < medicineIds.size(); i++) {
+            Long medicineId = medicineIds.get(i);
+            Integer quantitySold = quantitiesSold.get(i);
+
+            // Fetch the medicine by ID
+            MedicinDto medicine = medicineDao.getMedicineById(medicineId).getBody();
+            if (medicine == null) {
+                throw new SalesNotFoundException("Medicine with ID " + medicineId + " not found");
+            }
+
+            // Check if the quantity sold is not negative
+            if (quantitySold <= 0) {
+                throw new IllegalArgumentException("Quantity sold for medicine with ID " + medicineId + " cannot be negative");
+            }
+
+           
+
+            // Check if there is enough stock available
+            int availableQuantity = medicine.getQuantity();
+            if (availableQuantity < quantitySold) {
+                throw new SalesNotFoundException("Insufficient stock for medicine with ID " + medicineId);
+            }
+
+            // Calculate the total price
+            total += medicine.getPrice() * quantitySold;
+
+            // Update the stock quantity
+            int updatedQuantity = availableQuantity - quantitySold;
+            medicine.setQuantity(updatedQuantity);
+            medicineDao.updateMedicineQuantity(medicine.getId(), updatedQuantity);
+
+            // Add the medicine ID to the list of purchased medicine IDs
+            purchasedMedicineIds.add(medicineId);
+        }
+
+        // Create a new Sales entity
+        Sales sale = new Sales();
+        sale.setClientId(clientId);
+        sale.setDate(LocalDate.now());
+        sale.setMedicinesId(purchasedMedicineIds);
+        sale.setTotalPrice(total);
+
+        // Save the sale record
+        return saleRepository.save(sale);
+    }
+    public List<Sales> getSalesByClientId(Long clientId) {
+        // Implement logic to retrieve sales by client ID from SalesDao
+        return salesDao.getSalesByClientId(clientId);
+    }
+   
+
+	
+
+
+}

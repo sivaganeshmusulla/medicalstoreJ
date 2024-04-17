@@ -1,0 +1,139 @@
+package com.medicalstore.tests;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.medicalstore.controller.MedicineController;
+import com.medicalstore.dao.StockDao;
+import com.medicalstore.dto.StockDto;
+import com.medicalstore.entity.MedicineEntity;
+import com.medicalstore.service.MedicineService;
+
+@ExtendWith(MockitoExtension.class)
+public class MedicineTests {
+
+    @Mock
+    private MedicineService medicineService;
+
+    @Mock
+    private StockDao stockDao;
+
+    @InjectMocks
+    private MedicineController medicineController;
+
+    private MedicineEntity testMedicine;
+
+    @BeforeEach
+    void setUp() {
+        testMedicine = new MedicineEntity(1L, "Test Medicine", "10mg", 10.0, LocalDate.now().plusMonths(6),
+                "Test Manufacturer", "12345", LocalDate.now().minusMonths(1), "Test Description", 1L, 50);
+    }
+
+    @Test
+    public void testGetAllMedicines() {
+        // Prepare
+        List<MedicineEntity> medicines = new ArrayList<>();
+        medicines.add(testMedicine);
+
+        when(medicineService.getAllMedicines()).thenReturn(medicines);
+
+        // Execute
+        ResponseEntity<List<MedicineEntity>> response = medicineController.getAllMedicines();
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(medicines, response.getBody());
+    }
+
+    @Test
+    public void testGetMedicineById() {
+        // Prepare
+        when(medicineService.getMedicineById(1L)).thenReturn(testMedicine);
+
+        // Execute
+        ResponseEntity<MedicineEntity> response = medicineController.getMedicineById(1L);
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(testMedicine, response.getBody());
+    }
+
+    @Test
+    public void testAddMedicine() {
+        // Prepare
+        MedicineEntity newMedicine = new MedicineEntity(null, "New Medicine", "20mg", 15.0, LocalDate.now().plusMonths(9),
+                "New Manufacturer", "54321", LocalDate.now().minusMonths(2), "New Description", 2L, 100);
+
+        when(medicineService.saveMedicine(newMedicine)).thenReturn(newMedicine);
+
+        // Execute
+        ResponseEntity<?> response = medicineController.addMedicine(newMedicine);
+
+        // Verify
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(newMedicine, response.getBody());
+    }
+
+    @Test
+    public void testUpdateMedicine() {
+        // Prepare
+        MedicineEntity updatedMedicine = new MedicineEntity(1L, "Updated Medicine", "15mg", 12.0, LocalDate.now().plusMonths(12),
+                "Updated Manufacturer", "98765", LocalDate.now().minusMonths(3), "Updated Description", 1L, 75);
+
+        when(medicineService.getMedicineById(1L)).thenReturn(testMedicine);
+        when(medicineService.saveMedicine(any(MedicineEntity.class))).thenReturn(updatedMedicine);
+
+        // Execute
+        ResponseEntity<MedicineEntity> response = medicineController.updateMedicine(1L, updatedMedicine);
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(updatedMedicine, response.getBody());
+    }
+
+  
+
+    @Test
+    public void testUpdateMedicineQuantity() {
+        // Prepare
+        when(medicineService.updateMedicineQuantity(1L, 75)).thenReturn(testMedicine);
+
+        // Execute
+        ResponseEntity<MedicineEntity> response = medicineController.updateMedicineQuantity(1L, 75);
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(testMedicine, response.getBody());
+    }
+
+    @Test
+    public void testGetAllMedicinesByClientId() {
+        // Prepare
+        List<MedicineEntity> medicines = new ArrayList<>();
+        medicines.add(testMedicine);
+
+        when(medicineService.getAllMedicinesByClientId(1L)).thenReturn(medicines);
+
+        // Execute
+        ResponseEntity<List<MedicineEntity>> response = medicineController.getAllMedicines(1L);
+
+        // Verify
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(medicines, response.getBody());
+    }
+}

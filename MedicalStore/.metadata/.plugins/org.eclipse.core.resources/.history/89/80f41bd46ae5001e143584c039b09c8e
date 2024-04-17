@@ -1,0 +1,65 @@
+package com.medicalstore.controller;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.medicalstore.dao.ClientDao;
+import com.medicalstore.dao.MedicineDao;
+import com.medicalstore.dto.ClientDto;
+import com.medicalstore.dto.MedicinDto;
+import com.medicalstore.dto.RequestDto;
+import com.medicalstore.dto.StockDto;
+import com.medicalstore.entity.Sales;
+import com.medicalstore.service.SalesService;
+
+import jakarta.validation.Valid;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/sales")
+public class SalesController {
+    @Autowired
+    private ClientDao clientDao;
+    @Autowired
+    private SalesService salesService;
+    @Autowired
+    private MedicineDao medicineDao;
+
+    @GetMapping
+    public ResponseEntity<List<Sales>> getAllSales() {
+        List<Sales> sales = salesService.getAllSales();
+        return new ResponseEntity<>(sales, HttpStatus.OK);
+    }
+
+    @PostMapping("/purchaseMedicine")
+    public ResponseEntity<Sales> purchaseMedicine(@RequestBody RequestDto req ) {
+        
+        return new ResponseEntity<>(salesService.purchaseMedicine(req.getClientId(),req.getMedicineId(), req.getQuantity()), HttpStatus.CREATED);
+    	//return new ResponseEntity<>(req, HttpStatus.CREATED);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSale(@PathVariable Long id) {
+        salesService.deleteSaleById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    
+    @GetMapping("client/{id}")
+    public ClientDto get(@PathVariable("id") Long id)
+    {
+    	return clientDao.getClientById(id).getBody();
+    }
+    @GetMapping("/medicine/{id}")
+    public MedicinDto getMedicineById(@PathVariable Long id) {
+      return   medicineDao.getMedicineById(id).getBody();
+        
+    }
+  //  @PatchMapping("/medicines/quantityUpdate/{id}/{quantity}")
+  //  public ResponseEntity<MedicinDto> updateQuantity(@PathVariable("id") long id,@PathVariable("quantity") int quantity){
+  //  	return medicineDao.updateMedicineQuantity(id, quantity);
+ //   }
+}

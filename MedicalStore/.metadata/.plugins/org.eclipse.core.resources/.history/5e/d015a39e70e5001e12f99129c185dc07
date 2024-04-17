@@ -1,0 +1,109 @@
+package com.medicalstore.tests;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+
+import com.medicalstore.controller.SalesController;
+import com.medicalstore.dao.ClientDao;
+import com.medicalstore.dao.MedicineDao;
+import com.medicalstore.dto.ClientDto;
+import com.medicalstore.dto.MedicinDto;
+import com.medicalstore.dto.RequestDto;
+import com.medicalstore.entity.Sales;
+import com.medicalstore.service.SalesService;
+
+@ExtendWith(MockitoExtension.class)
+public class SalesTests {
+
+    @Mock
+    private ClientDao clientDao;
+    
+    @Mock
+    private SalesService salesService;
+    
+    @Mock
+    private MedicineDao medicineDao;
+    
+    @InjectMocks
+    private SalesController salesController;
+
+    @Test
+    public void testGetAllSales() {
+        List<Sales> salesList = new ArrayList<>();
+        
+        when(salesService.getAllSales()).thenReturn(salesList);
+
+        ResponseEntity<List<Sales>> response = salesController.getAllSales();
+
+        assertEquals(salesList, response.getBody());
+        assertEquals(200, response.getStatusCodeValue());
+    }
+
+    @Test
+    public void testPurchaseMedicine() {
+        
+        RequestDto requestDto = new RequestDto();
+        requestDto.setClientId(1L);
+        requestDto.setMedicineId(List.of(1L, 2L)); 
+        requestDto.setQuantity(List.of(5, 3)); 
+
+        Sales sales = new Sales();
+       
+
+        when(salesService.purchaseMedicine(any(), any(), any())).thenReturn(sales);
+
+        ResponseEntity<Sales> response = salesController.purchaseMedicine(requestDto);
+
+        assertEquals(sales, response.getBody());
+        assertEquals(201, response.getStatusCodeValue());
+    }
+
+
+    @Test
+    public void testDeleteSale() {
+        Long saleId = 1L;
+
+        ResponseEntity<Void> response = salesController.deleteSale(saleId);
+
+        assertEquals(204, response.getStatusCodeValue());
+    }
+
+    @Test
+    public void testGetClientById() {
+        Long clientId = 1L;
+        ClientDto clientDto = new ClientDto();
+        // Populate clientDto...
+
+        when(clientDao.getClientById(clientId)).thenReturn(ResponseEntity.ok(clientDto));
+
+        ClientDto response = salesController.get(clientId);
+
+        assertEquals(clientDto, response);
+    }
+
+    @Test
+    public void testGetMedicineById() {
+        Long medicineId = 1L;
+        MedicinDto medicinDto = new MedicinDto();
+        // Populate medicinDto...
+
+        when(medicineDao.getMedicineById(medicineId)).thenReturn(ResponseEntity.ok(medicinDto));
+
+        MedicinDto response = salesController.getMedicineById(medicineId);
+
+        assertEquals(medicinDto, response);
+    }
+}

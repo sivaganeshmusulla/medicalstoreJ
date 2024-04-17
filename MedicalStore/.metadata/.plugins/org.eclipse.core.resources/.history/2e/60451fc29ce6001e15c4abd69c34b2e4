@@ -1,0 +1,250 @@
+package com.medicalstore.service;
+import com.medicalstore.dao.ClientDao;
+import com.medicalstore.dao.MedicineDao;
+import com.medicalstore.dto.ClientDto;
+import com.medicalstore.dto.MedicinDto;
+import com.medicalstore.entity.Sales;
+import com.medicalstore.exception.SalesNotFoundException;
+import com.medicalstore.repository.SalesRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Service
+public class SalesService {
+    @Autowired
+    private SalesRepository saleRepository;
+    
+
+    @Autowired
+    private ClientDao clientDao;
+   
+    @Autowired
+    private MedicineDao medicineDao;
+    @Autowired
+    private SalesRepository salesRepository;
+    
+   
+    
+    public List<Sales> getAllSales() {
+        return saleRepository.findAll();
+    }
+    public void deleteSaleById(Long id) {
+        saleRepository.deleteById(id);
+    }
+
+    [Yesterday 23:47] SHAIK, PARVEZ
+    ha okay
+    [Yesterday 23:48] Musulla, Siva Ganesh
+    exam pass iyyava
+    [Yesterday 23:48] SHAIK, PARVEZ
+    yaa
+    [Yesterday 23:48] SHAIK, PARVEZ
+    90
+    [Yesterday 23:48] SHAIK, PARVEZ
+    vachndi
+    [Yesterday 23:48] SHAIK, PARVEZ
+    prudhvi di
+    [Yesterday 23:48] Musulla, Siva Ganesh
+    ok
+    [Yesterday 23:48] SHAIK, PARVEZ
+    87
+    [Yesterday 23:48] Musulla, Siva Ganesh
+    kalipi rasara
+    [Yesterday 23:48] SHAIK, PARVEZ
+    40 questions di rasa
+    [Yesterday 23:48] SHAIK, PARVEZ
+    aa yes
+    [Yesterday 23:48] Musulla, Siva Ganesh
+    vellu 65 questions rasaru
+    [Yesterday 23:52] Musulla, Siva Ganesh
+    morning early ga rara
+    [11:12] Musulla, Siva Ganesh
+    public Sales purchaseMedicine(Long clientId, Long medicineId, Integer quantitySold) {
+
+            // Fetch the client by ID
+
+            ClientDto client = clientDao.getClientById(clientId).getBody();
+
+            if (client == null) {
+
+                throw new SalesNotFoundException("Client with ID " + clientId + " not found");
+
+            }
+     
+            // Fetch the medicine by ID
+
+            MedicinDto medicine = medicineDao.getMedicineById(medicineId).getBody();
+
+            if (medicine == null) {
+
+                throw new SalesNotFoundException("Medicine with ID " + medicineId + " not found");
+
+            }
+     
+            // Check if the quantity sold is not negative
+
+            if (quantitySold <= 0) {
+
+                throw new IllegalArgumentException("Quantity sold for medicine with ID " + medicineId + " cannot be negative");
+
+            }
+     
+            // Check if there is enough stock available
+
+            int availableQuantity = medicine.getQuantity();
+
+            if (availableQuantity < quantitySold) {
+
+                throw new SalesNotFoundException("Insufficient stock for medicine with ID " + medicineId);
+
+            }
+     
+            // Calculate the total price
+
+            double totalPrice = medicine.getPrice() * quantitySold;
+     
+            // Update the stock quantity
+
+            int updatedQuantity = availableQuantity - quantitySold;
+
+            medicine.setQuantity(updatedQuantity);
+
+            medicineDao.update(medicine);
+     
+            // Create a new Sales entity
+
+            Sales sale = new Sales();
+
+            sale.setClientId(clientId);
+
+            sale.setDate(LocalDate.now());
+
+            sale.setMedicinesId(medicineId); // Use Collections.singletonList to create a list with a single element
+
+            sale.setTotalPrice(totalPrice);
+
+            // Save the sale record
+
+            return saleRepository.save(sale);
+
+        }
+    [11:17] Musulla, Siva Ganesh
+    @PutMapping("medicines/update")
+
+    	    public MedicinDto update(@RequestBody MedicinDto medicine);
+    [14:58] Musulla, Siva Ganesh
+    @PutMapping("/update")
+
+        public MedicineEntity update(@RequestBody MedicineEntity medicine)
+
+        {
+
+        	return medicineService.update(medicine);
+
+        }
+    [14:59] Musulla, Siva Ganesh
+    public MedicineEntity update(MedicineEntity medicine) {
+
+    		return medicineRepository.save(medicine);
+
+    	}
+    [15:01] Musulla, Siva Ganesh
+    public Sales saveSales(Sales sales) {
+
+            // Get the client ID from the sales entity
+
+            Long clientId = sales.getClientId();
+
+            // Fetch the client by ID
+
+            ClientDto client = clientDao.getClientById(clientId).getBody();
+
+            if (client == null) {
+
+                throw new SalesNotFoundException("Client with ID " + clientId + " not found");
+
+            }
+     
+            // Get the list of medicine IDs from the sales entity
+
+            Long medicineId = sales.getMedicinesId();
+
+            // Iterate through each medicine ID
+
+                // Fetch the medicine by ID
+
+                MedicinDto medicine = medicineDao.getMedicineById(medicineId).getBody();
+
+                if (medicine == null) {
+
+                    throw new SalesNotFoundException("Medicine with ID " + medicineId + " not found");
+
+                }
+
+     
+            // Save the sales entity
+
+            return saleRepository.save(sales);
+
+        }
+
+    public Sales purchaseMedicine(Long clientId, Long medicineId, Integer quantitySold) {
+        // Fetch the client by ID
+        ClientDto client = clientDao.getClientById(clientId).getBody();
+        if (client == null) {
+            throw new SalesNotFoundException("Client with ID " + clientId + " not found");
+        }
+ 
+        // Fetch the medicine by ID
+        MedicinDto medicine = medicineDao.getMedicineById(medicineId).getBody();
+        if (medicine == null) {
+            throw new SalesNotFoundException("Medicine with ID " + medicineId + " not found");
+        }
+ 
+        // Check if the quantity sold is not negative
+        if (quantitySold <= 0) {
+            throw new IllegalArgumentException("Quantity sold for medicine with ID " + medicineId + " cannot be negative");
+        }
+ 
+        // Check if there is enough stock available
+        int availableQuantity = medicine.getQuantity();
+        if (availableQuantity < quantitySold) {
+            throw new SalesNotFoundException("Insufficient stock for medicine with ID " + medicineId);
+        }
+ 
+        // Calculate the total price
+        double totalPrice = medicine.getPrice() * quantitySold;
+ 
+        // Update the stock quantity
+        int updatedQuantity = availableQuantity - quantitySold;
+        medicine.setQuantity(updatedQuantity);
+        medicineDao.update(medicine);
+ 
+        // Create a new Sales entity
+        Sales sale = new Sales();
+        sale.setClientId(clientId);
+        sale.setDate(LocalDate.now());
+        sale.setMedicinesId(medicineId); // Use Collections.singletonList to create a list with a single element
+        sale.setTotalPrice(totalPrice);
+        // Save the sale record
+        return saleRepository.save(sale);
+    } 
+    
+    
+    
+    
+    
+    public List<Sales> getSalesByClientId(Long clientId) {
+        return salesRepository.findByClientId(clientId);
+    }
+   
+   
+
+	
+
+
+}

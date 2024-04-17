@@ -1,0 +1,76 @@
+package com.medicalstore.entity;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
+@Entity
+@Table(name="sales")
+public class Sales {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    
+    private Long  clientId;
+
+    private Long medicinesId;
+
+    @NotNull(message = "Total price is required")
+    private double totalPrice;
+
+    @NotNull(message = "Date is required")
+    private LocalDateTime date;
+    
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
+
+	public Long getMedicinesId() {
+		return medicinesId;
+	}
+
+	public void setMedicinesId(Long medicinesId) {
+		this.medicinesId = medicinesId;
+	}
+
+	public double getTotalPrice() {
+		return totalPrice;
+	}
+
+	public void setTotalPrice(double totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Sales [id=" + id + ", clientId=" + clientId + ", medicinesId=" + medicinesId + ", totalPrice="
+				+ totalPrice + ", date=" + date + "]";
+	}
+
+	
+	public Sales() {
+		super();
+		
+	}
+	
+}

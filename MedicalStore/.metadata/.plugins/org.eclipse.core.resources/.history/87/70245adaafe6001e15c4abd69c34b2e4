@@ -1,0 +1,126 @@
+package com.medicalstore.service;
+
+
+
+import com.medicalstore.dao.StockDao;
+import com.medicalstore.dto.StockDto;
+import com.medicalstore.entity.*;
+import com.medicalstore.exception.MedicineNotFoundException;
+import com.medicalstore.exception.StockNotFoundException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import com.medicalstore.repository.MedicineRepository;
+
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class MedicineService {
+	private final MedicineRepository medicineRepository;
+    private final StockDao stockDao;
+
+    // Constructor injection for dependency
+    public MedicineService(MedicineRepository medicineRepository, StockDao stockDao) {
+        this.medicineRepository = medicineRepository;
+        this.stockDao = stockDao;
+    }
+    public List<MedicineEntity> getAllMedicines() {
+        return medicineRepository.findAll();
+    }
+
+    public MedicineEntity getMedicineById(Long id) {
+        // Retrieve medicine by ID from repository
+        MedicineEntity medicine = medicineRepository.findById(id)
+                .orElseThrow(() -> new MedicineNotFoundException("Medicine not found"));
+
+//        // Retrieve stock ID associated with the medicine
+//        Long stockId = medicine.getStockId();
+//        if (stockId == null) {
+//            throw new MedicineNotFoundException("Stock not found for medicine with ID: " + id);
+//        }
+//
+//        // Retrieve stock details from stock service
+//        ResponseEntity<StockDto> response = stockDao.getStockById(stockId);
+//        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+//            throw new MedicineNotFoundException("Stock details not found for medicine with ID: " + id);
+//        }
+//
+//        // Assuming setStockId() method is used to set stock ID in MedicineEntity
+//        medicine.setStockId(response.getBody().getId());
+
+        return medicine;
+    }
+    
+
+    
+    public MedicineEntity saveMedicine(MedicineEntity medicine) {
+//        Long stockId = medicine.getStockId();
+//        
+//        // Check if the stock ID is provided
+//        if (stockId != null) {
+//            // Query the stock service to check if the stock exists
+//            ResponseEntity<StockDto> response = stockDao.getStockById(stockId);
+//            
+//            // If the stock doesn't exist, throw an exception
+//            if (response.getStatusCode() == HttpStatus.NOT_FOUND || response.getBody() == null) {
+//                throw new StockNotFoundException("Stock with ID " + stockId + " not found");
+//            }
+//        }
+//        medicine.setStockId(stockId);
+//        // Save the medicine
+        return medicineRepository.save(medicine);
+    }
+
+	public List<MedicineEntity> getMedicinesByIds(List<Long> medicineIds) {
+        List<MedicineEntity> medicines = new ArrayList<>();
+        for (Long id : medicineIds) {
+            MedicineEntity medicine = getMedicineById(id);
+            if (medicine != null) {
+                medicines.add(medicine);
+            }
+        }
+        return medicines;
+    }
+	public MedicineEntity updateMedicineQuantity(Long id, int quantity) {
+        // Fetch the medicine details by ID
+        MedicineEntity medicine = medicineRepository.findById(id).get();
+        
+        // Check if the medicine exists
+        if (medicine==null) {
+            throw new MedicineNotFoundException("Medicine with ID " + id + " not found");
+        }
+
+        // Update the quantity
+        int updatedQuantity = medicine.getQuantity() - quantity;
+        medicine.setQuantity(updatedQuantity);
+
+        // Save the updated medicine entity
+        return medicineRepository.save(medicine);
+    }
+	
+	public MedicineEntity update(MedicineEntity medicine) {
+		return medicineRepository.save(medicine);
+	}
+	public MedicineEntity updateMedicine(Long id, MedicineEntity updatedMedicine) {
+        MedicineEntity existingMedicine =  medicineRepository.findById(id)
+                .orElseThrow(() -> new MedicineNotFoundException("Medicine not found"));
+ 
+        existingMedicine.setName(updatedMedicine.getName());
+        existingMedicine.setDosage(updatedMedicine.getDosage());
+        existingMedicine.setPrice(updatedMedicine.getPrice());
+        existingMedicine.setExpirationDate(updatedMedicine.getExpirationDate());
+        existingMedicine.setManufacturer(updatedMedicine.getManufacturer());
+        existingMedicine.setBatchNumber(updatedMedicine.getBatchNumber());
+        existingMedicine.setManufacturingDate(updatedMedicine.getManufacturingDate());
+        existingMedicine.setDescription(updatedMedicine.getDescription());
+        existingMedicine.setQuantity(updatedMedicine.getQuantity());
+ 
+        return medicineRepository.save(existingMedicine);
+    }
+	 
+}
